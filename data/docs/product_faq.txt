@@ -1,0 +1,23 @@
+NovaTech DataPilot - Product FAQ
+
+What is DataPilot?
+DataPilot is NovaTech's flagship product. It is an AI-powered analytics dashboard
+that connects to a company's existing data sources and generates automated insights,
+reports, and forecasts without requiring any coding knowledge.
+
+What data sources does DataPilot support?
+DataPilot integrates with Google Sheets, Microsoft Excel, Salesforce, HubSpot,
+PostgreSQL, MySQL, and most REST APIs.
+
+How much does DataPilot cost?
+DataPilot is priced at $299 per month for up to 5 users.
+Enterprise plans with unlimited users start at $999 per month.
+A 14-day free trial is available with no credit card required.
+
+What kind of support does NovaTech offer?
+All DataPilot plans include email support with a 24-hour response time.
+Enterprise plans include a dedicated account manager and phone support.
+
+Is DataPilot secure?
+DataPilot is SOC 2 Type II certified. All data is encrypted in transit and at rest.
+NovaTech does not sell or share customer data with third parties.
