@@ -1,8 +1,9 @@
-langchain
-langchain-community
-langchain-google-genai
-langgraph
-chromadb
+langchain==0.3.25
+langchain-community==0.3.24
+langchain-google-genai==2.1.4
+langchain-text-splitters==0.3.8
+langgraph==0.4.8
+chromadb==1.0.12
 tiktoken
 python-dotenv
 jupyter

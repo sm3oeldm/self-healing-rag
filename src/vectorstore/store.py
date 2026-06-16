@@ -6,7 +6,7 @@
 
 import os
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from src.config import GOOGLE_API_KEY, DOCS_PATH, CHROMA_DB_PATH, CHUNK_SIZE, CHUNK_OVERLAP
@@ -41,8 +41,9 @@ def chunk_documents(documents):
 def build_vectorstore(chunks):
     """Embed chunks and store them in ChromaDB."""
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/embedding-001",
-        google_api_key=GOOGLE_API_KEY
+        model="models/text-embedding-004",
+        google_api_key=GOOGLE_API_KEY,
+        client_options={"api_endpoint": "generativelanguage.googleapis.com"}
     )
     vectorstore = Chroma.from_documents(
         documents=chunks,
@@ -57,8 +58,9 @@ def build_vectorstore(chunks):
 def load_vectorstore():
     """Load an already-built ChromaDB from disk."""
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/embedding-001",
-        google_api_key=GOOGLE_API_KEY
+        model="models/text-embedding-004",
+        google_api_key=GOOGLE_API_KEY,
+        client_options={"api_endpoint": "generativelanguage.googleapis.com"}
     )
     vectorstore = Chroma(
         persist_directory=CHROMA_DB_PATH,
