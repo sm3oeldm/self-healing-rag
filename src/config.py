@@ -9,5 +9,7 @@ CHROMA_DB_PATH = "data/chroma_db"
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 50
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
-LLM_MODEL = "gemini-2.0-flash"
+# Override in .env with LLM_MODEL=<model_name> to swap without touching code.
+# Available: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, etc.
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash")
 MAX_RETRIES = 1

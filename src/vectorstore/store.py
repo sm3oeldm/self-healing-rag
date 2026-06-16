@@ -3,14 +3,14 @@
 #   2. Chunk them into smaller pieces
 #   3. Embed those chunks and store them in ChromaDB
 #
-# Uses SentenceTransformer (local, no API key needed) for embeddings.
+# Uses HuggingFace embeddings (local, no API key needed).
 
 
 import os
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import SentenceTransformerEmbeddings
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 from src.config import DOCS_PATH, CHROMA_DB_PATH, CHUNK_SIZE, CHUNK_OVERLAP, EMBEDDING_MODEL
 
 
@@ -41,8 +41,8 @@ def chunk_documents(documents):
 
 # ── 3. EMBED & STORE ─────────────────────────────────────────────────────────
 def build_vectorstore(chunks):
-    """Embed chunks with local SentenceTransformer and store in ChromaDB."""
-    embeddings = SentenceTransformerEmbeddings(model_name=EMBEDDING_MODEL)
+    """Embed chunks with local HuggingFace model and store in ChromaDB."""
+    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
     vectorstore = Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
@@ -55,7 +55,7 @@ def build_vectorstore(chunks):
 # ── 4. LOAD EXISTING STORE ───────────────────────────────────────────────────
 def load_vectorstore():
     """Load an already-built ChromaDB from disk."""
-    embeddings = SentenceTransformerEmbeddings(model_name=EMBEDDING_MODEL)
+    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
     vectorstore = Chroma(
         persist_directory=CHROMA_DB_PATH,
         embedding_function=embeddings
