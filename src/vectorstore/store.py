@@ -63,9 +63,14 @@ def load_vectorstore():
     return vectorstore
 
 
+# ── MODULE‑LEVEL CACHE ─────────────────────────────────────────────────────────
+_vectorstore = None  # Loaded once, reused for all queries in the session
+
 # ── 5. RETRIEVE ──────────────────────────────────────────────────────────────
 def retrieve_chunks(query: str, k: int = 3):
     """Search the vectorstore and return the top-k relevant chunks."""
-    vectorstore = load_vectorstore()
-    results = vectorstore.similarity_search(query, k=k)
+    global _vectorstore
+    if _vectorstore is None:
+        _vectorstore = load_vectorstore()
+    results = _vectorstore.similarity_search(query, k=k)
     return results
