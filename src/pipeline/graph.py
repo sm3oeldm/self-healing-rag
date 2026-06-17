@@ -78,6 +78,9 @@ def build_graph():
     return graph.compile()
 
 
+# Module-level cache — build the graph once, reuse for every question
+_app = None
+
 def run_pipeline(question: str) -> dict:
     """
     Run the full self-healing RAG pipeline for a given question.
@@ -88,7 +91,10 @@ def run_pipeline(question: str) -> dict:
     Returns:
         The final state dict containing the answer and all intermediate info
     """
-    app = build_graph()
+    global _app
+    if _app is None:
+        _app = build_graph()
+    app = _app
 
     initial_state = RAGState(
         question=question,
