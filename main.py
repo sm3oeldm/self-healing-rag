@@ -13,7 +13,7 @@ from src.config import CHROMA_DB_PATH
 
 def setup_vectorstore():
     """Build the vectorstore if it doesn't exist yet."""
-    if not os.path.exists(CHROMA_DB_PATH):
+    if not os.path.isdir(CHROMA_DB_PATH):
         print("Vector store not found. Building it now...")
         docs = load_documents()
         chunks = chunk_documents(docs)
@@ -35,7 +35,11 @@ def main():
     print("=" * 60)
 
     while True:
-        question = input("\nYour question: ").strip()
+        try:
+            question = input("\nYour question: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nGoodbye!")
+            break
 
         if question.lower() in ["quit", "exit", "q"]:
             print("Goodbye!")
@@ -45,14 +49,18 @@ def main():
             continue
 
         print("\n" + "-" * 40)
-        result = run_pipeline(question)
+        try:
+            result = run_pipeline(question)
+        except Exception as e:
+            print(f"\n[ERROR] Pipeline failed: {e}")
+            continue
 
         print("\n" + "=" * 40)
         print("FINAL ANSWER:")
-        print(result["final_answer"])
+        print(result.get("final_answer", "No answer generated."))
         print("=" * 40)
-        print(f"Verdict: {result['verdict']}")
-        print(f"Retries used: {result['retry_count']}")
+        print(f"Verdict: {result.get('verdict', 'N/A')}")
+        print(f"Retries used: {result.get('retry_count', 0)}")
         if result.get("reason"):
             print(f"Critic note: {result['reason']}")
 

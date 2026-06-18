@@ -10,6 +10,35 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from src.config import GOOGLE_API_KEY, LLM_MODEL
 
 
+# Module-level LLM cache — reused across all calls in the session
+_judge_llm = None
+_reformulate_llm = None
+
+
+def _get_judge_llm():
+    """Get or create the critic/judge LLM (temperature=0 for deterministic results)."""
+    global _judge_llm
+    if _judge_llm is None:
+        _judge_llm = ChatGoogleGenerativeAI(
+            model=LLM_MODEL,
+            google_api_key=GOOGLE_API_KEY,
+            temperature=0
+        )
+    return _judge_llm
+
+
+def _get_reformulate_llm():
+    """Get or create the reformulation LLM (low temperature for focused rewriting)."""
+    global _reformulate_llm
+    if _reformulate_llm is None:
+        _reformulate_llm = ChatGoogleGenerativeAI(
+            model=LLM_MODEL,
+            google_api_key=GOOGLE_API_KEY,
+            temperature=0.3
+        )
+    return _reformulate_llm
+
+
 def evaluate_answer(question: str, context_chunks: list, answer: str) -> dict:
     """
     Evaluate whether the answer is grounded in the retrieved chunks.
@@ -22,11 +51,7 @@ def evaluate_answer(question: str, context_chunks: list, answer: str) -> dict:
     Returns:
         dict with keys "verdict" ("PASS" or "FAIL") and "reason" (str)
     """
-    llm = ChatGoogleGenerativeAI(
-        model=LLM_MODEL,
-        google_api_key=GOOGLE_API_KEY,
-        temperature=0
-    )
+    llm = _get_judge_llm()
 
     # Format the context chunks into a readable string
     context_text = "\n\n".join([
@@ -91,11 +116,7 @@ def reformulate_query(original_query: str, failed_reason: str) -> str:
     Returns:
         A reformulated query string
     """
-    llm = ChatGoogleGenerativeAI(
-        model=LLM_MODEL,
-        google_api_key=GOOGLE_API_KEY,
-        temperature=0.3
-    )
+    llm = _get_reformulate_llm()
 
     prompt = f"""A RAG system failed to retrieve good information for this question:
 

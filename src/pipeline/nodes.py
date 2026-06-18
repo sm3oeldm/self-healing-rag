@@ -12,6 +12,22 @@ from src.agents.critic import evaluate_answer, reformulate_query
 from src.config import GOOGLE_API_KEY, LLM_MODEL, MAX_RETRIES
 
 
+# Module-level LLM cache — created once and reused across all generate_node calls
+_generator_llm = None
+
+
+def _get_generator_llm():
+    """Get or create the answer-generator LLM (low temperature for factual output)."""
+    global _generator_llm
+    if _generator_llm is None:
+        _generator_llm = ChatGoogleGenerativeAI(
+            model=LLM_MODEL,
+            google_api_key=GOOGLE_API_KEY,
+            temperature=0.2
+        )
+    return _generator_llm
+
+
 def retrieve_node(state: dict) -> dict:
     """
     Node 1: Retrieve relevant chunks from ChromaDB for the current question.
@@ -28,11 +44,7 @@ def generate_node(state: dict) -> dict:
     """
     print(f"\n[GENERATE] Generating answer...")
 
-    llm = ChatGoogleGenerativeAI(
-        model=LLM_MODEL,
-        google_api_key=GOOGLE_API_KEY,
-        temperature=0.2
-    )
+    llm = _get_generator_llm()
 
     # Format chunks into context string
     context_text = "\n\n".join([

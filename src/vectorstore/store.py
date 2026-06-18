@@ -7,6 +7,7 @@
 
 
 import os
+import shutil
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_chroma import Chroma
@@ -41,7 +42,16 @@ def chunk_documents(documents):
 
 # ── 3. EMBED & STORE ─────────────────────────────────────────────────────────
 def build_vectorstore(chunks):
-    """Embed chunks with local HuggingFace model and store in ChromaDB."""
+    """Embed chunks with local HuggingFace model and store in ChromaDB.
+
+    WARNING: This DELETES any existing ChromaDB at CHROMA_DB_PATH first,
+    so you won't end up with duplicate chunks from repeated builds.
+    """
+    # Clear any existing database to avoid duplicate chunks on rebuild
+    if os.path.isdir(CHROMA_DB_PATH):
+        shutil.rmtree(CHROMA_DB_PATH)
+        print(f"Cleared existing vectorstore at '{CHROMA_DB_PATH}'.")
+
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
     vectorstore = Chroma.from_documents(
         documents=chunks,
@@ -55,6 +65,11 @@ def build_vectorstore(chunks):
 # ── 4. LOAD EXISTING STORE ───────────────────────────────────────────────────
 def load_vectorstore():
     """Load an already-built ChromaDB from disk."""
+    if not os.path.isdir(CHROMA_DB_PATH):
+        raise FileNotFoundError(
+            f"Vectorstore not found at '{CHROMA_DB_PATH}'. "
+            "Run build_vectorstore() first or use setup_vectorstore() from main.py."
+        )
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
     vectorstore = Chroma(
         persist_directory=CHROMA_DB_PATH,

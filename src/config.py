@@ -1,9 +1,16 @@
 import os
+import sys
 from dotenv import load_dotenv
 
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if not GOOGLE_API_KEY:
+    print("ERROR: GOOGLE_API_KEY is not set. Create a .env file with:")
+    print("  GOOGLE_API_KEY=your_gemini_api_key_here")
+    print("Get a free key at: https://aistudio.google.com")
+    sys.exit(1)
+
 DOCS_PATH = "data/docs"
 CHROMA_DB_PATH = "data/chroma_db"
 CHUNK_SIZE = 500
