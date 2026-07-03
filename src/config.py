@@ -20,3 +20,10 @@ EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 # Available: gemini-2.5-flash, gemini-2.5-pro, gemini-2.0-flash, etc.
 LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash")
 MAX_RETRIES = 1
+
+# ── API / Server Settings ─────────────────────────────────────────────────────
+# Override in .env with SERVER_HOST=<host>, SERVER_PORT=<port>, CORS_ORIGINS=<origin>
+# CORS_ORIGINS can be a comma-separated list of allowed origins.
+SERVER_HOST = os.getenv("SERVER_HOST", "127.0.0.1")
+SERVER_PORT = int(os.getenv("SERVER_PORT", "8000"))
+CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",")]

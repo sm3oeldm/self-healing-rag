@@ -1,18 +1,24 @@
 """
 Self-Healing RAG Pipeline — Main Entry Point
 
-Run this script to start the interactive question-answering loop.
-The vectorstore is automatically built on first run.
+Run modes:
+  python main.py           Interactive CLI (original behaviour)
+  python main.py --serve   Start the FastAPI web server
+  python main.py --help    Show usage
 """
 
+from __future__ import annotations
+
+import argparse
 import os
-from src.vectorstore.store import load_documents, chunk_documents, build_vectorstore
-from src.pipeline.graph import run_pipeline
-from src.config import CHROMA_DB_PATH
+import sys
 
 
 def setup_vectorstore():
     """Build the vectorstore if it doesn't exist yet."""
+    from src.config import CHROMA_DB_PATH
+    from src.vectorstore.store import load_documents, chunk_documents, build_vectorstore
+
     if not os.path.isdir(CHROMA_DB_PATH):
         print("Vector store not found. Building it now...")
         docs = load_documents()
@@ -23,11 +29,12 @@ def setup_vectorstore():
         print("Vector store already exists. Skipping build.\n")
 
 
-def main():
-    # Step 1: Make sure the vectorstore is ready
+def run_cli():
+    """Original interactive CLI loop."""
+    from src.pipeline.graph import run_pipeline
+
     setup_vectorstore()
 
-    # Step 2: Ask questions in a loop
     print("=" * 60)
     print("Self-Healing RAG Pipeline")
     print("Ask questions about NovaTech Inc.")
@@ -41,7 +48,7 @@ def main():
             print("\nGoodbye!")
             break
 
-        if question.lower() in ["quit", "exit", "q"]:
+        if question.lower() in ("quit", "exit", "q"):
             print("Goodbye!")
             break
 
@@ -63,6 +70,50 @@ def main():
         print(f"Retries used: {result.get('retry_count', 0)}")
         if result.get("reason"):
             print(f"Critic note: {result['reason']}")
+
+
+def run_server():
+    """Start the FastAPI web server."""
+    from src.api.server import run_server as _start
+    _start()
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Self-Healing RAG Pipeline",
+    )
+    parser.add_argument(
+        "--serve", "-s",
+        action="store_true",
+        help="Start the FastAPI web server instead of the interactive CLI.",
+    )
+    parser.add_argument(
+        "--host",
+        default=None,
+        help="Override the server host (default: from .env or 127.0.0.1).",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="Override the server port (default: from .env or 8000).",
+    )
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> None:
+    args = parse_args(argv)
+
+    if args.serve:
+        # Allow CLI overrides for host/port
+        if args.host:
+            os.environ.setdefault("SERVER_HOST", args.host)
+        if args.port:
+            os.environ.setdefault("SERVER_PORT", str(args.port))
+        setup_vectorstore()
+        run_server()
+    else:
+        run_cli()
 
 
 if __name__ == "__main__":
